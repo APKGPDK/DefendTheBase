@@ -1,5 +1,6 @@
 const path = require('path');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -29,13 +30,19 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
       hash: true
-    })
+    }),
+    new CopyWebpackPlugin([
+      {
+        from: 'src/Assets',
+        to: 'assets'
+      }
+    ], {})
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
   },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist')
   }
 };
