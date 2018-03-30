@@ -6,7 +6,7 @@ export default class GameScene extends Scene {
 
     onCreate() {
         console.log('Jestem w drugiej scenie!')
-        this.camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 3, -8), this.scene);
+        this.camera = new BABYLON.FreeCamera('camera1', new BABYLON.Vector3(0, 3, -12), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
         this.camera.attachControl(this.game.getCanvas(), false)
         const light = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-23, -10, 3), this.scene);
@@ -29,12 +29,14 @@ export default class GameScene extends Scene {
             console.log(message, exception);
         }
 
-        const ground = BABYLON.Mesh.CreateGround('ground1', 10, 10, 10, this.scene, false);
+        const ground = BABYLON.Mesh.CreateGround('ground1', 50, 30, 10, this.scene, false);
         var grassMaterial = new BABYLON.StandardMaterial("Grass", this.scene);
         grassMaterial.alpha = 1;
         grassMaterial.diffuseColor = new BABYLON.Color3(0, 1,0);
         ground.material = grassMaterial;
         assetsManager.load();
+
+        this.scene.debugLayer.show();
         
     }
 

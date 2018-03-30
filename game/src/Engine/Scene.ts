@@ -9,11 +9,13 @@ export default class Scene {
 
     create() {
         this.onCreate()
+        
     }
 
     update() {
         this.onUpdate()
         this.scene.render()
+      
     }
 
     destroy() {
@@ -21,6 +23,9 @@ export default class Scene {
     }
 
     onCreate() { }
-    onUpdate() { }
+    onUpdate() {
+
+
+     }
     onDestroy() { }
 }
