@@ -4,8 +4,16 @@ Exporter version: 5.5.0, Blender version: 2.79 (sub 0)
 		selected layers only:  false
 		flat shading entire scene:  false
 		inline textures:  false
-		texture directory:  C:\Users\USER\Desktop\PROGRAMOWANIE\Blender Assets\
+		texture directory:  C:\Users\USER\Desktop\PROGRAMOWANIE\DefendTheBase\assets\
 	Python World class constructor completed
+	processing begun of mesh:  Bush
+		processing begun of Standard material:  Material
+		num positions      :  295
+		num normals        :  295
+		num uvs            :  0
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  1758
 	processing begun of mesh:  Icosphere.004
 		processing begun of Standard material:  Material.005
 		num positions      :  24
@@ -46,17 +54,9 @@ Exporter version: 5.5.0, Blender version: 2.79 (sub 0)
 		num uvs2           :  0
 		num colors         :  0
 		num indices        :  138
-	processing begun of mesh:  Cube
-		processing begun of Standard material:  Material
-		num positions      :  295
-		num normals        :  295
-		num uvs            :  0
-		num uvs2           :  0
-		num colors         :  0
-		num indices        :  1758
 	processing begun of camera (UniversalCamera):  Camera
 	processing begun of light (POINT):  Lamp
 ========= Writing of scene file started =========
 ========= Writing of scene file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 0.1055 secs
+elapsed time:  0 min, 0.0833 secs
