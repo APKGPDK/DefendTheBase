@@ -9,6 +9,7 @@
         "allowJs": true,
         "types": [
             "babylonjs"
-        ]
+        ],
+        "lib": [ "es2015", "dom" ]
     }
 }

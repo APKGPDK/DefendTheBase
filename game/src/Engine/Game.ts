@@ -22,9 +22,9 @@ export default class Game {
         })
     }
 
-    instantiateScene(sceneName: typeof Scene) {
+    async instantiateScene(sceneName: typeof Scene) {
         const scene = new sceneName(this)
-        scene.create()
+        await scene.create()
         this.runningScenes.push(scene)
         return scene
     }
@@ -47,13 +47,13 @@ export default class Game {
         })
     }
 
-    switchScene(sceneName: typeof Scene) {
+    async switchScene(sceneName: typeof Scene) {
         let nextScene: Scene
         const runningScenes = this.runningScenes.filter((scene: Scene) => scene instanceof sceneName)
         if(runningScenes.length) {
             nextScene = runningScenes[0]
         } else {
-            nextScene = runningScenes.length ? runningScenes[0] : this.instantiateScene(sceneName)
+            nextScene = runningScenes.length ? runningScenes[0] :  await this.instantiateScene(sceneName)
         }
 
         if(this.currentScene) {
