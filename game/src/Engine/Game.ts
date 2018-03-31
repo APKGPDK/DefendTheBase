@@ -1,16 +1,21 @@
 import * as BABYLON from 'babylonjs'
 import Scene from './Scene';
+import { MeshAssets } from '../MeshAssets';
 
 export default class Game {
     private engine: BABYLON.Engine;
     private runningScenes: Scene[] = []
     private currentScene: Scene = null
+    private meshes: {
+        [key: string]: BABYLON.Mesh
+     } = {}
 
     constructor(private canvas: HTMLCanvasElement) {
         this.engine = new BABYLON.Engine(canvas, true, {
             preserveDrawingBuffer: true,
             stencil: true
         })
+        this.engine.enableOfflineSupport = false
 
         window.addEventListener('resize', () => {
             this.engine.resize()
@@ -57,6 +62,14 @@ export default class Game {
         }
 
         this.currentScene = nextScene
+    }
+
+    addMeshData(name: keyof typeof MeshAssets, data: BABYLON.Mesh) {
+        this.meshes[name] = data
+    }
+
+    getMeshData(name: keyof typeof MeshAssets) {
+        return this.meshes[name]
     }
 
 }
