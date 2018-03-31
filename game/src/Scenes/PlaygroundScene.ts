@@ -34,7 +34,7 @@ export default class GameScene extends Scene {
         }
 
         meshTask2.onSuccess =  (task) => {
-            task.loadedMeshes[0].position = new BABYLON.Vector3(6,  1, 0)
+            task.loadedMeshes[0].position = new BABYLON.Vector3(6,  0, 0)
             //task.loadedMeshes[1].beginAnimation("rotation animation", true, 1);
             this.scene.beginAnimation(task.loadedMeshes[1], 0, 300, true)
             console.log(task.loadedMeshes[1].animations);
