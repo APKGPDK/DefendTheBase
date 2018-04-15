@@ -1,5 +1,14 @@
 import Game from './Game';
 import { MeshAssets } from "../MeshAssets";
+import Entity from './Entity';
+import System from './System';
+
+export interface MeshModel {
+    name: string,
+    meshName: keyof typeof MeshAssets,
+    position?: BABYLON.Vector3,
+    scaling?: BABYLON.Vector3
+}
 
 export default class Scene {
     protected scene: BABYLON.Scene
@@ -40,7 +49,7 @@ export default class Scene {
             assetsManager.onFinish = async (tasks: BABYLON.MeshAssetTask[]) => {
                 tasks.forEach(task => {
                     let mesh: BABYLON.Mesh
-                    if(task.loadedMeshes.length > 1) {
+                    if (task.loadedMeshes.length > 1) {
                         mesh = new BABYLON.Mesh(task.name)
                         task.loadedMeshes.forEach(loadedMesh => mesh.addChild(loadedMesh))
                     } else {
@@ -56,14 +65,23 @@ export default class Scene {
         })
     }
 
-    createMesh({ name, meshName, position = BABYLON.Vector3.Zero() }: {
-        name: string,
-        meshName: keyof typeof MeshAssets,
-        position?: BABYLON.Vector3
-    }) {
+    createMesh({ name, meshName, position = BABYLON.Vector3.Zero(), scaling = new BABYLON.Vector3(1, 1, 1) }: MeshModel) {
         const mesh = this.game.getMeshData(meshName).clone(name)
         mesh.setParent(null)
         mesh.position = position
+        mesh.scaling = scaling
         return mesh
+    }
+
+    createEntity(meshModel: MeshModel) {
+        const mesh = this.createMesh(meshModel);
+        const entity = new Entity(mesh);
+        (entity.mesh as any).parentEntity = entity;
+        return entity;
+    }
+
+    disposeEntity(entity: Entity) {
+        entity.systems.forEach(systemName => this.game.removeEntityFromSystem(entity, systemName))
+        entity.dispose()
     }
 }

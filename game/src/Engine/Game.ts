@@ -1,14 +1,17 @@
 import * as BABYLON from 'babylonjs'
 import Scene from './Scene';
 import { MeshAssets } from '../MeshAssets';
+import System, { SystemInterface } from './System';
+import Entity from './Entity';
 
 export default class Game {
     private engine: BABYLON.Engine;
+    private systems: System[] = []
     private runningScenes: Scene[] = []
     private currentScene: Scene = null
     private meshes: {
         [key: string]: BABYLON.Mesh
-     } = {}
+    } = {}
 
     constructor(private canvas: HTMLCanvasElement) {
         this.engine = new BABYLON.Engine(canvas, true, {
@@ -38,11 +41,14 @@ export default class Game {
     }
 
     start(sceneName: typeof Scene = null) {
-        if(sceneName) {
+        if (sceneName) {
             this.switchScene(sceneName)
         }
 
         this.engine.runRenderLoop(() => {
+            this.systems.forEach(system => {
+                system.update()
+            })
             this.currentScene && this.currentScene.update()
         })
     }
@@ -50,13 +56,13 @@ export default class Game {
     async switchScene(sceneName: typeof Scene) {
         let nextScene: Scene
         const runningScenes = this.runningScenes.filter((scene: Scene) => scene instanceof sceneName)
-        if(runningScenes.length) {
+        if (runningScenes.length) {
             nextScene = runningScenes[0]
         } else {
-            nextScene = runningScenes.length ? runningScenes[0] :  await this.instantiateScene(sceneName)
+            nextScene = runningScenes.length ? runningScenes[0] : await this.instantiateScene(sceneName)
         }
 
-        if(this.currentScene) {
+        if (this.currentScene) {
             this.runningScenes = this.runningScenes.filter((scene: Scene) => this.currentScene === scene)
             this.currentScene.destroy()
         }
@@ -70,6 +76,22 @@ export default class Game {
 
     getMeshData(name: keyof typeof MeshAssets) {
         return this.meshes[name]
+    }
+
+    registerSystem(systemName: new (game: Game) => System) {
+        this.systems.push(new systemName(this))
+    }
+
+    addEntityToSystem(entity: Entity, systemName: typeof System) {
+        const system = this.systems.find(system => system instanceof systemName)
+        entity.markSystem(systemName);
+        system.add(entity);
+    }
+
+    removeEntityFromSystem(entity: Entity, systemName: typeof System) {
+        const system = this.systems.find(system => system instanceof systemName)
+        system.entities = system.entities.filter(systemEntity => systemEntity != entity)
+        entity.unmarkSystem(systemName);
     }
 
 }
