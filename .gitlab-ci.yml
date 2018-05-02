@@ -11,8 +11,8 @@ deploy:
   before_script:
     - "docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY"
   script:
-    - "docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH}:latest --pull ./game"
-    - "docker push ${CI_REGISTRY}/${CI_PROJECT_PATH}:latest"
+    - "docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH_SLUG}:latest --pull ./game"
+    - "docker push ${CI_REGISTRY}/${CI_PROJECT_PATH_SLUG}:latest"
   after_script:
     - "docker logout ${CI_REGISTRY}"
 
