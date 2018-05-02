@@ -14,9 +14,8 @@ build:
   before_script:
     - "docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY"
   script:
-    - "docker build -t ${CI_REGISTRY}/${CI_PROJECT_PATH_SLUG}:latest --pull ./game"
-    - "docker push ${CI_REGISTRY}/${CI_PROJECT_PATH_SLUG}:latest"
+    - "docker build -t ${CI_REGISTRY}/antonipelka/defendthebase:latest --pull ./game"
+    - "docker push ${CI_REGISTRY}/antonipelka/defendthebase:latest"
   after_script:
     - "docker logout ${CI_REGISTRY}"
-    - "echo 0"
 
