@@ -3,8 +3,10 @@ import Scene from './Scene';
 import { MeshAssets } from '../MeshAssets';
 import System, { SystemInterface } from './System';
 import Entity from './Entity';
+import { TimeManager } from './TimeManager';
 
 export default class Game {
+    public timeManager: TimeManager
     private engine: BABYLON.Engine;
     private systems: System[] = []
     private runningScenes: Scene[] = []
@@ -23,6 +25,8 @@ export default class Game {
         window.addEventListener('resize', () => {
             this.engine.resize()
         })
+
+        this.timeManager = new TimeManager
     }
 
     async instantiateScene(sceneName: typeof Scene) {
@@ -46,6 +50,7 @@ export default class Game {
         }
 
         this.engine.runRenderLoop(() => {
+            this.timeManager.tick()
             this.systems.forEach(system => {
                 system.update()
             })
@@ -70,6 +75,10 @@ export default class Game {
         this.currentScene = nextScene
     }
 
+    getCurrentScene() {
+        return this.currentScene
+    }
+
     addMeshData(name: keyof typeof MeshAssets, data: BABYLON.Mesh) {
         this.meshes[name] = data
     }
@@ -80,6 +89,10 @@ export default class Game {
 
     registerSystem(systemName: new (game: Game) => System) {
         this.systems.push(new systemName(this))
+    }
+
+    getSystem<T extends typeof System>(systemName: T): T['prototype'] {
+        return this.systems.find(system => system instanceof (systemName as any)) as any
     }
 
     addEntityToSystem(entity: Entity, systemName: typeof System) {

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "babylonjs": "^3.2.0-alphaB",
-    "cannon": "^0.6.2"
+    "cannon": "^0.6.2",
+    "npm": "^6.0.0"
   }
 }

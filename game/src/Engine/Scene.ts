@@ -1,3 +1,4 @@
+import * as BABYLON from 'babylonjs'
 import Game from './Game';
 import { MeshAssets } from "../MeshAssets";
 import Entity from './Entity';
@@ -83,5 +84,12 @@ export default class Scene {
     disposeEntity(entity: Entity) {
         entity.systems.forEach(systemName => this.game.removeEntityFromSystem(entity, systemName))
         entity.dispose()
+    }
+
+    setPhysicsImpostor(entity: Entity, { type, options }: {
+        type: number,
+        options: BABYLON.PhysicsImpostorParameters
+    }) {
+        entity.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(entity.mesh, type, options, this.scene)
     }
 }

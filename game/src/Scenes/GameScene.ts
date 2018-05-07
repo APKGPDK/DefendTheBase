@@ -4,13 +4,11 @@ import { MeshAssets } from "../MeshAssets";
 import Entity from "../Engine/Entity";
 import MovingSystem from "../Systems/MovingSystem";
 import MovementComponent from "../Components/MovementComponent";
-import { Vector3 } from "babylonjs";
+import { Vector3, PhysicsImpostor, Mesh } from "babylonjs";
+import EnemySystem from "../Systems/EnemySystem";
 
 export default class GameScene extends Scene {
     private camera: BABYLON.UniversalCamera
-    private enemy: Entity
-    private hp: number
-    private killed: boolean
 
     async onCreate() {
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
@@ -50,12 +48,29 @@ export default class GameScene extends Scene {
         this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 3, -9), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
         this.camera.attachControl(this.game.getCanvas(), false)
+
+        var ssaoRatio = {
+            ssaoRatio: 0.5, // Ratio of the SSAO post-process, in a lower resolution
+            combineRatio: 1.0 // Ratio of the combine post-process (combines the SSAO and the scene)
+        };
+
+        var ssao = new BABYLON.SSAORenderingPipeline("ssao", this.scene, ssaoRatio);
+        ssao.fallOff = 0.000001;
+        ssao.area = 1;
+        ssao.radius = 0.0001;
+        ssao.totalStrength = 1.0;
+        ssao.base = 0.5;
+
+        // Attach camera to the SSAO render pipeline
+        this.scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", this.camera);
+
         const light = new BABYLON.HemisphericLight("HemisphericLight", new BABYLON.Vector3(0, 10, 3), this.scene);
         light.intensity = 5;
         light.specular = new BABYLON.Color3(0, 0, 0);
 
         const ground = BABYLON.Mesh.CreateGround('Ground', 50, 30, 10, this.scene, false);
-        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.9 }, this.scene);
+        ground.position = Vector3.Zero();
+        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.PlaneImpostor, { mass: 0, restitution: 0.9 }, this.scene);
 
         var grassMaterial = new BABYLON.StandardMaterial("Grass", this.scene);
         grassMaterial.alpha = 1;
@@ -63,10 +78,6 @@ export default class GameScene extends Scene {
         ground.material = grassMaterial;
 
         this.scene.debugLayer.show();
-
-
-        this.createEnemy();
-        this.hp = 100;
 
         this.scene.onPointerDown = event => {
             const pickResult = this.scene.pick(this.scene.unTranslatedPointer.x, this.scene.unTranslatedPointer.y);
@@ -76,74 +87,35 @@ export default class GameScene extends Scene {
         }
 
     }
-
+    registeredFunction: Function
     shoot(point: Vector3) {
-        const direction = point.subtract(new Vector3(6, 3, 0)).divide(new Vector3(64, 64, 64))
+        const direction = point.subtract(new Vector3(6, 3, 0)).normalize().multiply(new Vector3(64, 64, 64))
         let entity = this.createEntity({
             name: "Bullet",
             meshName: "Enemy",
             position: new Vector3(6, 3, 0),
             scaling: new Vector3(0.1, 0.1, 0.1)
         });
-        entity.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(entity.mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0 }, this.scene);
-        entity.mesh.physicsImpostor.registerOnPhysicsCollide(this.enemy.mesh.physicsImpostor, (collider, collidedAgaints) => {
-            collidedAgaints.setMass(1);
-            this.disposeEntity((collider.object as any).parentEntity)
-            this.disposeEntity((collidedAgaints.object as any).parentEntity)
-            if(!this.killed) {
-                console.log('Enemy destroyed!')
-                this.killed = true;
-                setTimeout(() => this.createEnemy())
-            }
-        })
         entity.addComponent(new MovementComponent(direction));
+        entity.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(entity.mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0 }, this.scene);
+        entity.mesh.physicsImpostor.physicsBody.collisionResponse = false
+        entity.mesh.physicsImpostor.setLinearVelocity(direction)
+
+        const enemySystem = this.game.getSystem(EnemySystem)
+        const impostors = enemySystem.entities.map(enemy => enemy.mesh.physicsImpostor)
+        const hitCallback = (collider: BABYLON.PhysicsImpostor, collidedAgaints: BABYLON.PhysicsImpostor) => {
+            (collider.object as Mesh).visibility = 0
+            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, 50, collider.getObjectCenter())
+            this.disposeEntity((collider.object as any).parentEntity)
+            //this.disposeEntity((collidedAgaints.object as any).parentEntity)
+            entity.mesh.physicsImpostor.unregisterOnPhysicsCollide(impostors, hitCallback)
+        }
+        entity.mesh.physicsImpostor.registerOnPhysicsCollide(impostors, hitCallback)
+
         this.game.addEntityToSystem(entity, MovingSystem);
     }
 
-    createEnemy() {
-        this.enemy = this.createEntity({
-            name: "Enemy",
-            meshName: "Enemy",
-            position: new Vector3(-8, 0.5, 0),
-            scaling: new Vector3(0.5, 0.5, 0.5)
-        });
-        this.enemy.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(this.enemy.mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 0.9 }, this.scene).sleep()
-        this.enemy.addComponent(new MovementComponent(new Vector3(1, 0, 0).divide(new Vector3(64, 64, 64))));
-        this.game.addEntityToSystem(this.enemy, MovingSystem);
+    onUpdate() { }
 
-        this.killed = false;
-        /*this.enemy.actionManager = new BABYLON.ActionManager(this.scene);
-        this.enemy.actionManager.registerAction(new BABYLON.ExecuteCodeAction(
-            BABYLON.ActionManager.OnLeftPickTrigger,
-            () => {
-                //console.log('Enemy destroyed!')
-                this.enemy.dispose();
-                this.killed = true;
-                this.enemy.position = new Vector3(-4, 0.5, 0);
-                this.createEnemy();
-            }
-        ));*/
-    }
-
-    onUpdate() {
-        if (this.enemy) {
-            if(this.enemy.mesh.position.x > 4) {
-                this.enemy.getComponent(MovementComponent).velocity = BABYLON.Vector3.Zero()
-            }
-            if (!this.killed && this.enemy.mesh.position.x < 4) {
-                // this.enemy.mesh.position.x += 0.1;
-
-            } else if (!this.killed) {
-                console.log("Your base got hit!");
-                this.hp--;
-                if (!this.hp)
-                    console.log("Your base got destroyed!");
-            }
-        }
-
-    }
-
-    onDestroy() {
-
-    }
+    onDestroy() { }
 }

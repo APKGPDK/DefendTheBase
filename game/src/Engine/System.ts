@@ -2,6 +2,7 @@ import Game from "./Game";
 import Entity from "./Entity";
 
 export interface SystemInterface {
+    onStart(): void;
     onUpdate(): void;
 }
 
@@ -12,10 +13,15 @@ export default abstract class System implements SystemInterface {
 
     }
 
+    start() {
+        this.onStart()
+    }
+
     update() {
         this.onUpdate()
     }
 
+    onStart() { }
     abstract onUpdate(): void;
 
     add(entity: Entity) {
