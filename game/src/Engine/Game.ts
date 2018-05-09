@@ -4,6 +4,7 @@ import { MeshAssets } from '../MeshAssets';
 import System, { SystemInterface } from './System';
 import Entity from './Entity';
 import { TimeManager } from './TimeManager';
+import { TextureAssets } from '../TextureAssets';
 
 export default class Game {
     public timeManager: TimeManager
@@ -13,6 +14,9 @@ export default class Game {
     private currentScene: Scene = null
     private meshes: {
         [key: string]: BABYLON.Mesh
+    } = {}
+    private textures: {
+        [key in string]: BABYLON.Texture
     } = {}
 
     constructor(private canvas: HTMLCanvasElement) {
@@ -85,6 +89,14 @@ export default class Game {
 
     getMeshData(name: keyof typeof MeshAssets) {
         return this.meshes[name]
+    }
+
+    addTextureData(name: keyof typeof TextureAssets, data: BABYLON.Texture) {
+        this.textures[name] = data
+    }
+
+    getTextureData(name: keyof typeof TextureAssets) {
+        return this.textures[name]
     }
 
     registerSystem(systemName: new (game: Game) => System) {
