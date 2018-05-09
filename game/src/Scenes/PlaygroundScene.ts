@@ -1,7 +1,7 @@
 import Scene from "../Engine/Scene";
 import { Mesh } from "babylonjs";
 
-export default class GameScene extends Scene {
+export default class PlaygroundScene extends Scene {
     private camera: BABYLON.FreeCamera
 
     onCreate() {

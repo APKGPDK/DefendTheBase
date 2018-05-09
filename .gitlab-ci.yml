@@ -1,0 +1,21 @@
+stages:
+  - deploy
+
+build:
+  stage: deploy
+  image: docker:latest
+  only:
+    - "master"
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: "overlay"
+  
+  before_script:
+    - "docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY"
+  script:
+    - "docker build -t ${CI_REGISTRY}/antonipelka/defendthebase:latest --pull ./game"
+    - "docker push ${CI_REGISTRY}/antonipelka/defendthebase:latest"
+  after_script:
+    - "docker logout ${CI_REGISTRY}"
+

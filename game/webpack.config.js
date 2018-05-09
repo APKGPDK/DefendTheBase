@@ -7,7 +7,10 @@ module.exports = {
   entry: './src/index.ts',
   devtool: 'inline-source-map',
   devServer: {
-    contentBase: './dist'
+    host: '0.0.0.0',
+    contentBase: './dist',
+    port: 8080,
+    public: 'http://localhost:8080'
   },
   module: {
     rules: [
