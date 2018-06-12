@@ -12,7 +12,7 @@ export interface MeshModel {
 }
 
 export default class Scene {
-    protected scene: BABYLON.Scene
+    public scene: BABYLON.Scene
     private meshPrefabs: BABYLON.Mesh
 
     constructor(protected game: Game) {
@@ -38,32 +38,53 @@ export default class Scene {
     onUpdate() { }
     onDestroy() { }
 
-    preloadAssets(assets: { [key: string]: string }) {
-        return new Promise((resolve, reject) => {
+    preloadAssets(meshAssets: { [key: string]: string }, textureAssets: { [key: string]: string }) {
+        return Promise.all([new Promise((resolve, reject) => {
             const assetsManager = new BABYLON.AssetsManager(this.scene)
             assetsManager.useDefaultLoadingScreen = false;
 
-            for (let key in assets) {
-                assetsManager.addMeshTask(key, "", "assets/", assets[key])
+            for (let key in meshAssets) {
+                assetsManager.addMeshTask(key, "", "assets/", meshAssets[key])
             }
-
-            assetsManager.onFinish = async (tasks: BABYLON.MeshAssetTask[]) => {
+            assetsManager.onFinish = async (tasks: BABYLON.AbstractAssetTask[]) => {
                 tasks.forEach(task => {
-                    let mesh: BABYLON.Mesh
-                    if (task.loadedMeshes.length > 1) {
-                        mesh = new BABYLON.Mesh(task.name)
-                        task.loadedMeshes.forEach(loadedMesh => mesh.addChild(loadedMesh))
-                    } else {
-                        mesh = task.loadedMeshes[0] as BABYLON.Mesh
+                    if (task instanceof BABYLON.MeshAssetTask) {
+                        let mesh: BABYLON.Mesh
+                        if (task.loadedMeshes.length > 1) {
+                            mesh = new BABYLON.Mesh(task.name)
+                            task.loadedMeshes.forEach(loadedMesh => mesh.addChild(loadedMesh))
+                        } else {
+                            mesh = task.loadedMeshes[0] as BABYLON.Mesh
+                        }
+                        mesh.setParent(this.meshPrefabs)
+                        this.game.addMeshData(task.name, mesh)
                     }
-                    mesh.setParent(this.meshPrefabs)
-                    this.game.addMeshData(task.name, mesh)
                 })
                 resolve()
             }
+            assetsManager.onTaskError = error => reject(error)
 
             assetsManager.load()
-        })
+        }), new Promise((resolve, reject) => {
+            const assetsManager = new BABYLON.AssetsManager(this.scene)
+            assetsManager.useDefaultLoadingScreen = false;
+
+            for (let key in textureAssets) {
+                assetsManager.addTextureTask(key, "assets/" + textureAssets[key])
+            }
+            assetsManager.onFinish = async (tasks: BABYLON.AbstractAssetTask[]) => {
+                tasks.forEach(task => {
+                    console.log(1, task)
+                    if (task instanceof BABYLON.TextureAssetTask) {
+                        this.game.addTextureData((task.name as any), task.texture)
+                    }
+                })
+                resolve()
+            }
+            assetsManager.onTaskError = error => reject(error)
+
+            assetsManager.load()
+        })])
     }
 
     createMesh({ name, meshName, position = BABYLON.Vector3.Zero(), scaling = new BABYLON.Vector3(1, 1, 1) }: MeshModel) {
@@ -92,4 +113,6 @@ export default class Scene {
     }) {
         entity.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(entity.mesh, type, options, this.scene)
     }
+
+
 }

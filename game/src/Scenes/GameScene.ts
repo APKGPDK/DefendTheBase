@@ -9,6 +9,7 @@ import EnemySystem from "../Systems/EnemySystem";
 
 export default class GameScene extends Scene {
     private camera: BABYLON.UniversalCamera
+    public shadowGenerator: BABYLON.ShadowGenerator
 
     async onCreate() {
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
@@ -18,7 +19,9 @@ export default class GameScene extends Scene {
             Tree: "Tree1.babylon",
             Base: "Base.babylon",
             Enemy: "Enemy.babylon"
-        })
+        }, {
+                Particle: "Particle.png"
+            })
 
         const bush1 = this.createMesh({
             meshName: 'Bush',
@@ -45,39 +48,44 @@ export default class GameScene extends Scene {
         })
         this.scene.beginAnimation(base.getChildMeshes()[1], 0, 300, true)
 
-        this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 3, -9), this.scene);
+        this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 20, -10), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
         this.camera.attachControl(this.game.getCanvas(), false)
 
-        var ssaoRatio = {
-            ssaoRatio: 0.5, // Ratio of the SSAO post-process, in a lower resolution
-            combineRatio: 1.0 // Ratio of the combine post-process (combines the SSAO and the scene)
-        };
-
-        var ssao = new BABYLON.SSAORenderingPipeline("ssao", this.scene, ssaoRatio);
-        ssao.fallOff = 0.000001;
-        ssao.area = 1;
-        ssao.radius = 0.0001;
-        ssao.totalStrength = 1.0;
-        ssao.base = 0.5;
-
-        // Attach camera to the SSAO render pipeline
-        this.scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline("ssao", this.camera);
-
-        const light = new BABYLON.HemisphericLight("HemisphericLight", new BABYLON.Vector3(0, 10, 3), this.scene);
-        light.intensity = 5;
+        const light = new BABYLON.HemisphericLight("HemisphericLight", new BABYLON.Vector3(0, 1, 0), this.scene);
+        light.intensity = 0.5;
+        light.diffuse = new BABYLON.Color3(0.5, 0.5, 0.5)
         light.specular = new BABYLON.Color3(0, 0, 0);
+
+        const directionalLight = new BABYLON.DirectionalLight("DirectionalLight", new BABYLON.Vector3(-1, -1, 1), this.scene)
+        directionalLight.specular = new BABYLON.Color3(0, 0, 0)
+        directionalLight.diffuse = new BABYLON.Color3(1, 1, 1)
+        directionalLight.intensity = 1
+        directionalLight.position = new Vector3(10, 10, 10)
+        directionalLight.shadowMinZ = 1;
+        directionalLight.shadowMaxZ = 20
+
+
+        this.shadowGenerator = new BABYLON.ShadowGenerator(1024, directionalLight);
+        this.shadowGenerator.useBlurCloseExponentialShadowMap = true;
+        this.shadowGenerator.forceBackFacesOnly = true;
+
+        this.shadowGenerator.addShadowCaster(tree)
+        this.shadowGenerator.addShadowCaster(bush1)
+        this.shadowGenerator.addShadowCaster(bush2)
+        this.shadowGenerator.addShadowCaster(base)
 
         const ground = BABYLON.Mesh.CreateGround('Ground', 50, 30, 10, this.scene, false);
         ground.position = Vector3.Zero();
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.PlaneImpostor, { mass: 0, restitution: 0.9 }, this.scene);
+        ground.receiveShadows = true;
 
         var grassMaterial = new BABYLON.StandardMaterial("Grass", this.scene);
         grassMaterial.alpha = 1;
         grassMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0);
         ground.material = grassMaterial;
 
-        this.scene.debugLayer.show();
+        //this.scene.debugLayer.show();
 
         this.scene.onPointerDown = event => {
             const pickResult = this.scene.pick(this.scene.unTranslatedPointer.x, this.scene.unTranslatedPointer.y);
@@ -105,14 +113,32 @@ export default class GameScene extends Scene {
         const impostors = enemySystem.entities.map(enemy => enemy.mesh.physicsImpostor)
         const hitCallback = (collider: BABYLON.PhysicsImpostor, collidedAgaints: BABYLON.PhysicsImpostor) => {
             (collider.object as Mesh).visibility = 0
-            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, 50, collider.getObjectCenter())
+            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, 25, collider.getObjectCenter())
+            this.explode(collider.getObjectCenter())
             this.disposeEntity((collider.object as any).parentEntity)
-            //this.disposeEntity((collidedAgaints.object as any).parentEntity)
             entity.mesh.physicsImpostor.unregisterOnPhysicsCollide(impostors, hitCallback)
         }
         entity.mesh.physicsImpostor.registerOnPhysicsCollide(impostors, hitCallback)
 
         this.game.addEntityToSystem(entity, MovingSystem);
+    }
+
+    explode(position: Vector3) {
+
+        const systemName = "particles" + (new Date).getTime();
+        const particleSystem = new BABYLON.ParticleSystem(name, 10, this.scene);
+        particleSystem.minEmitPower = 10;
+        particleSystem.maxEmitPower = 10;
+        particleSystem.particleTexture = this.game.getTextureData("Particle")
+        particleSystem.emitter = position.add(new Vector3(0.5, 0, 0))
+        particleSystem.gravity = new Vector3(0, 10, 0)
+        particleSystem.start()
+        setTimeout(() => {
+            particleSystem.stop()
+        }, 500)
+        setTimeout(() => {
+            particleSystem.dispose(false)
+        }, 3000)
     }
 
     onUpdate() { }
