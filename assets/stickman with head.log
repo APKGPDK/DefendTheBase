@@ -27,8 +27,14 @@ Exporter version: 5.5.0, Blender version: 2.79 (sub 0)
 		processing begun of bone:  Bone.019, index:  17
 		processing begun of bone:  Bone.020, index:  18
 		processing begun of bone:  Bone.021, index:  19
-		processing action ArmatureAction.001:  in[0 - 80], out[0 - 80]
+		processing action KickingAttackAnimation:  in[0 - 40], out[0 - 40]
+		processing action PunchingAttackAnimation:  in[0 - 80], out[50 - 130]
+		processing action WalkingAnimation:  in[0 - 80], out[140 - 220]
 	processing begun of mesh:  Body
+		animation processing begun
+			processing action KickingAttackAnimation:  in[0 - 40], out[0 - 40]
+			processing action PunchingAttackAnimation:  in[0 - 80], out[50 - 130]
+			processing action WalkingAnimation:  in[0 - 80], out[140 - 220]
 		processing begun of Standard material:  Material
 		num positions      :  549
 		num normals        :  549
@@ -44,8 +50,12 @@ Exporter version: 5.5.0, Blender version: 2.79 (sub 0)
 			exported as 8 influencers
 			num skeletonWeights and skeletonIndices:  4392
 	processing begun of camera (UniversalCamera):  Camera
+		animation processing begun
+			processing action KickingAttackAnimation:  in[0 - 40], out[0 - 40]
+			processing action PunchingAttackAnimation:  in[0 - 80], out[50 - 130]
+			processing action WalkingAnimation:  in[0 - 80], out[140 - 220]
 	processing begun of light (POINT):  Lamp
 ========= Writing of scene file started =========
 ========= Writing of scene file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 0.6671 secs
+elapsed time:  0 min, 1.2018 secs
