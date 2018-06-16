@@ -13,6 +13,7 @@ export default class GameScene extends Scene {
 
     async onCreate() {
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
+        let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
 
         await this.preloadAssets({
             Bush: "Bush2.babylon",
@@ -97,7 +98,7 @@ export default class GameScene extends Scene {
     }
     registeredFunction: Function
     shoot(point: Vector3) {
-        const direction = point.subtract(new Vector3(6, 3, 0)).normalize().multiply(new Vector3(64, 64, 64))
+        const direction = point.subtract(new Vector3(6, 3, 0)).normalize().multiply(new Vector3(32, 32, 32))
         let entity = this.createEntity({
             name: "Bullet",
             meshName: "Enemy",
