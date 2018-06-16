@@ -47,23 +47,27 @@ export default class Scene {
             for (let key in meshAssets) {
                 assetsManager.addMeshTask(key, "", "assets/", meshAssets[key])
             }
-            assetsManager.onFinish = async (tasks: BABYLON.AbstractAssetTask[]) => {
-                tasks.forEach(task => {
-                    if (task instanceof BABYLON.MeshAssetTask) {
-                        let mesh: BABYLON.Mesh
-                        if (task.loadedMeshes.length > 1) {
-                            mesh = new BABYLON.Mesh(task.name)
-                            task.loadedMeshes.forEach(loadedMesh => mesh.addChild(loadedMesh))
-                        } else {
-                            mesh = task.loadedMeshes[0] as BABYLON.Mesh
-                        }
-                        mesh.setParent(this.meshPrefabs)
-                        this.game.addMeshData(task.name, mesh)
+            assetsManager.onTaskSuccessObservable.add(task => {
+                if (task instanceof BABYLON.MeshAssetTask) {
+                    let mesh: BABYLON.Mesh
+                    if (task.loadedMeshes.length > 1) {
+                        mesh = new BABYLON.Mesh(task.name)
+                        task.loadedMeshes.forEach(loadedMesh => mesh.addChild(loadedMesh))
+                    } else {
+                        mesh = task.loadedMeshes[0] as BABYLON.Mesh
                     }
-                })
+                    mesh.setParent(this.meshPrefabs)
+                    this.game.addMeshData(task.name, mesh)
+                }
+            });
+            assetsManager.onFinish = () => {
                 resolve()
             }
-            assetsManager.onTaskError = error => reject(error)
+
+            assetsManager.onTaskErrorObservable.add(function(task, state) {
+                console.log('task failed', task.errorObject.message, task.errorObject.exception, state);
+                reject(task)
+            });
 
             assetsManager.load()
         }), new Promise((resolve, reject) => {
@@ -75,7 +79,6 @@ export default class Scene {
             }
             assetsManager.onFinish = async (tasks: BABYLON.AbstractAssetTask[]) => {
                 tasks.forEach(task => {
-                    console.log(1, task)
                     if (task instanceof BABYLON.TextureAssetTask) {
                         this.game.addTextureData((task.name as any), task.texture)
                     }

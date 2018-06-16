@@ -48,9 +48,9 @@ export default class Game {
         return this.canvas
     }
 
-    start(sceneName: typeof Scene = null) {
+    async start(sceneName: typeof Scene = null) {
         if (sceneName) {
-            this.switchScene(sceneName)
+            await this.switchScene(sceneName)
         }
 
         this.engine.runRenderLoop(() => {
