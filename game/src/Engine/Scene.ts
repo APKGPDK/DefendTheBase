@@ -92,8 +92,11 @@ export default class Scene {
     }
 
     createMesh({ name, meshName, position = BABYLON.Vector3.Zero(), scaling = new BABYLON.Vector3(1, 1, 1),  rotation = BABYLON.Vector3.Zero() }: MeshModel ) {
-       // debugger;
-        const mesh = this.game.getMeshData(meshName).clone(name)
+        const originalMesh = this.game.getMeshData(meshName)
+        const mesh = originalMesh.clone(name)
+        if(originalMesh.skeleton) {
+            mesh.skeleton = (originalMesh.skeleton as any).clone()
+        }
         mesh.setParent(null)
         mesh.position = position
         mesh.scaling = scaling

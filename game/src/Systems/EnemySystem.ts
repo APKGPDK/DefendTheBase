@@ -33,20 +33,23 @@ export default class EnemySystem extends System {
 
         this.lastSpawnAt = this.game.timeManager.getElapsedMiliseconds()
 
+        const currentScene = this.game.getCurrentScene();
+
         const startHealth = 100
         const enemyData = new EnemyComponent(startHealth)
-        const enemy = this.game.getCurrentScene().createEntity({
+        const enemy = currentScene.createEntity({
             name: "StickmanEnemy",
             meshName: "StickmanEnemy",
-            position: new Vector3(-16, 0.5, Math.ceil(Math.random() * 10 - 5)),
+            position: new Vector3(-16, 4.5, Math.ceil(Math.random() * 10 - 5)),
             scaling: new Vector3(0.5, 0.5, 0.5),
             rotation: new Vector3(5, 0, 0)
         });
 
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
-        enemy.mesh.enableEdgesRendering();
-        enemy.mesh.edgesWidth = 2.0;
-        enemy.mesh.edgesColor = new BABYLON.Color4(0, 0, 0, 0.1);
+        enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true)
+        //const animation = currentScene.scene.beginAnimation(enemy.mesh.skeleton, 140, 220, true);
+
+        //animation.stop();
 
         const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene)
         material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)
