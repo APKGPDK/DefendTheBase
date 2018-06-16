@@ -36,11 +36,13 @@ export default class EnemySystem extends System {
         const startHealth = 100
         const enemyData = new EnemyComponent(startHealth)
         const enemy = this.game.getCurrentScene().createEntity({
-            name: "Enemy",
-            meshName: "Enemy",
+            name: "StickmanEnemy",
+            meshName: "StickmanEnemy",
             position: new Vector3(-16, 0.5, Math.ceil(Math.random() * 10 - 5)),
-            scaling: new Vector3(0.5, 0.5, 0.5)
+            scaling: new Vector3(0.5, 0.5, 0.5),
+            rotation: new Vector3(5, 0, 0)
         });
+
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
         enemy.mesh.enableEdgesRendering();
         enemy.mesh.edgesWidth = 2.0;

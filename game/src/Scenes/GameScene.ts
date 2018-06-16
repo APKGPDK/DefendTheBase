@@ -13,13 +13,14 @@ export default class GameScene extends Scene {
 
     async onCreate() {
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
-        let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
+        //let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
 
         await this.preloadAssets({
             Bush: "Bush2.babylon",
             Tree: "Tree1.babylon",
             Base: "Base.babylon",
-            Enemy: "Enemy.babylon"
+            Enemy: "Enemy.babylon",
+            StickmanEnemy: "StickmanEnemy.babylon"
         }, {
                 Particle: "Particle.png"
             })

@@ -8,7 +8,8 @@ export interface MeshModel {
     name: string,
     meshName: keyof typeof MeshAssets,
     position?: BABYLON.Vector3,
-    scaling?: BABYLON.Vector3
+    scaling?: BABYLON.Vector3,
+    rotation?: BABYLON.Vector3
 }
 
 export default class Scene {
@@ -87,11 +88,13 @@ export default class Scene {
         })])
     }
 
-    createMesh({ name, meshName, position = BABYLON.Vector3.Zero(), scaling = new BABYLON.Vector3(1, 1, 1) }: MeshModel) {
+    createMesh({ name, meshName, position = BABYLON.Vector3.Zero(), scaling = new BABYLON.Vector3(1, 1, 1),  rotation = BABYLON.Vector3.Zero() }: MeshModel ) {
+       // debugger;
         const mesh = this.game.getMeshData(meshName).clone(name)
         mesh.setParent(null)
         mesh.position = position
         mesh.scaling = scaling
+        mesh.rotation = rotation
         return mesh
     }
 
