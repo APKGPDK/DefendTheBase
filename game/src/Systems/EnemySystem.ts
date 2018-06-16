@@ -21,6 +21,15 @@ export default class EnemySystem extends System {
         this.entities.forEach(enemy => {
             if (enemy.mesh.position.x > 4) {
                 enemy.mesh.physicsImpostor.setLinearVelocity(Vector3.Zero())
+
+                if(enemy.animations.walk){
+                    enemy.animations.walk.stop();
+                    enemy.animations.walk = void 0;
+                    enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
+                }
+                
+                //enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
+                
             }
 
             this.deleteIfGarbage(enemy);
@@ -40,16 +49,17 @@ export default class EnemySystem extends System {
         const enemy = currentScene.createEntity({
             name: "StickmanEnemy",
             meshName: "StickmanEnemy",
-            position: new Vector3(-16, 4.5, Math.ceil(Math.random() * 10 - 5)),
-            scaling: new Vector3(0.5, 0.5, 0.5),
-            rotation: new Vector3(5, 0, 0)
+            position: new Vector3(-16, 1.4, Math.ceil(Math.random() * 10 - 5)),
+            scaling: new Vector3(0.25, 0.25, 0.25),
+            rotation: new Vector3(0, 30, 0)
         });
 
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
-        enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true)
+        //console.log(enemy.mesh.animations);
+        enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true)
         //const animation = currentScene.scene.beginAnimation(enemy.mesh.skeleton, 140, 220, true);
 
-        //animation.stop();
+      //  animation.stop();
 
         const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene)
         material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)

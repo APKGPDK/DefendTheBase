@@ -1,5 +1,5 @@
 import Component from "./Component";
-import { Mesh } from "babylonjs";
+import { Mesh, Animatable } from "babylonjs";
 import System from "./System";
 
 export default class Entity {
@@ -8,6 +8,8 @@ export default class Entity {
     } = {};
 
     systems: typeof System[] = []
+
+    animations : {[key:string]:Animatable} = {}
 
     constructor(public mesh: Mesh) {
 

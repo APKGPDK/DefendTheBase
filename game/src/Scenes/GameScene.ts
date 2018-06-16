@@ -18,7 +18,7 @@ export default class GameScene extends Scene {
         await this.preloadAssets({
             Bush: "Bush2.babylon",
             Tree: "Tree1.babylon",
-            Base: "Base.babylon",
+            Base: "baseCenter.babylon",
             Enemy: "Enemy.babylon",
             StickmanEnemy: "StickmanEnemy.babylon"
         }, {
@@ -48,7 +48,7 @@ export default class GameScene extends Scene {
             name: "Base",
             position: new BABYLON.Vector3(6, 0, 0)
         })
-        this.scene.beginAnimation(base.getChildMeshes()[1], 0, 300, true)
+        this.scene.beginAnimation(base.getChildMeshes()[0], 0, 300, true)
 
         this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 20, -10), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
