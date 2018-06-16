@@ -9,3 +9,60 @@ html, body {
     height: 100%;
     width: 100%;
 }
+
+#hud {
+}
+
+#hp {
+    font-family: fantasy;
+    font-size: 4vh;
+    position: fixed;
+    right: 4vh;
+    top: 2vh;
+    color: green;
+    text-shadow: 2px 2px black;
+    pointer-events: none;
+}
+
+#cash {
+    font-family: fantasy;
+    font-size: 4vh;
+    position: fixed;
+    left: 4vh;
+    top: 2vh;
+    color: gold;
+    text-shadow: 2px 2px black;
+    pointer-events: none;
+}
+
+#wave {
+    font-family: fantasy;
+    font-size: 4vh;
+    position: fixed;
+    left: 4vh;
+    bottom: 4vh;
+    color: black;
+    text-shadow: 2px 2px green;
+    pointer-events: none;
+}
+
+button {
+    color: white;
+    background: #333;
+    border: 0;
+    padding: 1vh;
+    font-size: 3vh;
+    cursor: pointer;
+    font-family: fantasy;
+}
+
+button:hover {
+    background: black;
+    transform: skewY(5deg);
+}
+
+#actions {
+    position: fixed;
+    right: 4vh;
+    bottom: 4vh;
+}
