@@ -115,7 +115,9 @@ export default class Game {
     }
 
     registerSystem(systemName: new (game: Game) => System) {
-        this.systems.push(new systemName(this))
+        const system = new systemName(this);
+        this.systems.push(system);
+        return system;
     }
 
     getSystem<T extends typeof System>(systemName: T): T['prototype'] {

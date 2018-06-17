@@ -47,14 +47,14 @@ export default class EnemySystem extends System {
                 this.waveData[this.currentWave][1]--
             }
 
-            if(this.waveData[this.currentWave][2] > 0){
+            if (this.waveData[this.currentWave][2] > 0) {
                 this.spawnEnemy("BombEnemy", "BombEnemy")
                 this.waveData[this.currentWave][2]--
             }
 
             if (this.waveData[this.currentWave][0] == 0 && this.waveData[this.currentWave][1] == 0 && this.waveData[this.currentWave][2] == 0 && this.enemiesCount == 0) {
-                this.currentWave++
-                this.healthBonus += 25;
+                this.currentWave++;
+                this.healthBonus++;
             }
         }
         this.entities.forEach(enemy => {
@@ -92,11 +92,11 @@ export default class EnemySystem extends System {
         var scale = new Vector3(0.65, 0.65, 0.65);
         var pos = new Vector3(-16, 0.6, Math.ceil(Math.random() * 10 - 5));
 
-        if(meshName == "StickmanEnemy"){
-            scale = new Vector3(0.25, 0.25, 0.25);  
+        if (meshName == "StickmanEnemy") {
+            scale = new Vector3(0.25, 0.25, 0.25);
             pos = new Vector3(-16, 1.4, Math.ceil(Math.random() * 10 - 5));
         }
-          
+
         const enemy = currentScene.createEntity({
             name: "Enemy",
             meshName,
@@ -106,10 +106,10 @@ export default class EnemySystem extends System {
         });
 
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
-        if(meshName != "BombEnemy"){
+        if (meshName != "BombEnemy") {
             enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true);
-        } else{
-           currentScene.scene.beginDirectAnimation(enemy.mesh,  [enemy.mesh.animations[0]],  0, 250, true);
+        } else {
+            currentScene.scene.beginDirectAnimation(enemy.mesh, [enemy.mesh.animations[0]], 0, 250, true);
         }
 
         const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene);

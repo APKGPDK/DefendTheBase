@@ -7,6 +7,7 @@ import MovementComponent from "../Components/MovementComponent";
 import { Vector3, PhysicsImpostor, Mesh, Color3, DirectionalLight } from "babylonjs";
 import EnemySystem from "../Systems/EnemySystem";
 import HUDSystem from "../Systems/HUDSystem";
+import BaseSystem from "../Systems/BaseSystem";
 
 export default class GameScene extends Scene {
     private camera: BABYLON.UniversalCamera
@@ -66,6 +67,7 @@ export default class GameScene extends Scene {
 
     registeredFunction: Function
     shoot(point: Vector3) {
+        const baseSystem = this.game.getSystem(BaseSystem);
         const direction = point.subtract(new Vector3(6, 5, 0)).normalize().multiply(new Vector3(32, 32, 32))
         let entity = this.createEntity({
             name: "Bullet",
@@ -82,7 +84,7 @@ export default class GameScene extends Scene {
         const impostors = enemySystem.entities.map(enemy => enemy.mesh.physicsImpostor)
         const hitCallback = (collider: BABYLON.PhysicsImpostor, collidedAgaints: BABYLON.PhysicsImpostor) => {
             (collider.object as Mesh).visibility = 0
-            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, 25, collider.getObjectCenter()) // mnoznik do obrazen za ulepszenia
+            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, baseSystem.getDamage(), collider.getObjectCenter()) // mnoznik do obrazen za ulepszenia
             this.explode(collider.getObjectCenter())
             this.disposeEntity((collider.object as any).parentEntity)
             entity.mesh.physicsImpostor.unregisterOnPhysicsCollide(impostors, hitCallback)
@@ -215,6 +217,7 @@ export default class GameScene extends Scene {
                 position: new Vector3(5 - Math.cos(i), -Math.random(), i * 2)
             })
             wall.setEnabled(false);
+            this.walls.push(wall);
             this.shadowGenerator.addShadowCaster(wall)
         }
     }

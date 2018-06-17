@@ -10,11 +10,13 @@ import BaseSystem from './Systems/BaseSystem';
 const canvas = <HTMLCanvasElement>document.getElementById('game');
 
 const game = new Game(canvas);
+const global = (window as any);
 game.registerSystem(MovingSystem);
 game.registerSystem(EnemySystem);
 game.registerSystem(HUDSystem);
-game.registerSystem(BaseSystem);
+const baseSystem = game.registerSystem(BaseSystem) as BaseSystem;
 
-(window as any).startGame = () => game.start(GameScene);
-
-(window as any)['game'] = game;
+global.startGame = () => game.start(GameScene);
+global.buildWalls = () => baseSystem.upgradeWalls();
+global.buildWarehouses = () => baseSystem.upgradeWarehouses();
+global.game = game;
