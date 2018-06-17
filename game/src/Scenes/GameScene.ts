@@ -22,6 +22,7 @@ export default class GameScene extends Scene {
             Rock2: "Rock2.babylon",
             Base: "baseCenter.babylon",
             Enemy: "Enemy.babylon",
+            BombEnemy: "BombEnemy.babylon",
             StickmanEnemy: "StickmanEnemy.babylon"
         }, {
                 Particle: "Particle.png"
