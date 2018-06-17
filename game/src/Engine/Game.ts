@@ -40,6 +40,19 @@ export default class Game {
         return scene
     }
 
+    disposeScene(sceneName: typeof Scene) {
+        if (this.currentScene instanceof sceneName) {
+            this.currentScene = null;
+        }
+        this.runningScenes = this.runningScenes.filter(runningScene => {
+            if (runningScene instanceof sceneName) {
+                runningScene.destroy();
+                return false;
+            }
+            return true;
+        })
+    }
+
     getEngine() {
         return this.engine
     }
@@ -53,12 +66,14 @@ export default class Game {
             await this.switchScene(sceneName)
         }
 
+        this.systems.forEach(system => system.start());
+
         this.engine.runRenderLoop(() => {
-            this.timeManager.tick()
-            this.systems.forEach(system => {
-                system.update()
-            })
-            this.currentScene && this.currentScene.update()
+            if(this.currentScene) {
+                this.timeManager.tick()
+                this.systems.forEach(system => system.update());
+                this.currentScene.update();
+            }
         })
     }
 
@@ -117,6 +132,18 @@ export default class Game {
         const system = this.systems.find(system => system instanceof systemName)
         system.entities = system.entities.filter(systemEntity => systemEntity != entity)
         entity.unmarkSystem(systemName);
+    }
+
+    recreateSystems() {
+        this.systems = this.systems.map(system => new (system as any).constructor(this))
+    }
+
+    async restart() {
+        const currentSceneClass = (this.currentScene as any).constructor;
+        this.disposeScene(currentSceneClass);
+        this.engine.stopRenderLoop();
+        this.recreateSystems();
+        await this.start(currentSceneClass);
     }
 
 }

@@ -4,9 +4,7 @@ import MovementComponent from "../Components/MovementComponent";
 export default class HUDSystem extends System {
 
     private properties: { [key: string]: string | number } = {
-        hp: "123",
         wave: "10",
-        cash: "499"
     }
 
     onUpdate(): void {
@@ -21,5 +19,17 @@ export default class HUDSystem extends System {
 
     setProperty(key: string, value: string | number) {
         this.properties[key] = value;
+    }
+
+    showGameOver() {
+        document.getElementById('gameover').classList.add('visible');
+    }
+
+    hideGameOver() {
+        document.getElementById('gameover').classList.remove('visible');
+    }
+
+    hideMenu() {
+        document.getElementById('menu').classList.add('hidden');
     }
 }

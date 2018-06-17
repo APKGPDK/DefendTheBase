@@ -8,7 +8,7 @@
     <title>Bunker Defense</title>
 </head>
 
-<body>
+<body style="opacity: 0;">
     <canvas id="game" width="100%" height="100%"></canvas>
     <div id="hud">
         <div id="hp">
@@ -24,6 +24,19 @@
             <button>Ulepsz bazę</button>
             <button>Ulepsz broń</button>
             <button>Zmień broń</button>
+        </div>
+    </div>
+    <div id="gameover">
+        <div id="message">
+            <h3>BAZA UPADŁA</h3>
+            <button onclick="game.restart()">Spróbuj ponownie</button>
+        </div>
+    </div>
+    <div id="menu">
+        <div id="message">
+            <h2>DEFEND THE BASE</h2>
+            <h4>BIEDA EDITION</h4>
+            <button onclick="startGame()">Rozpocznij grę</button>
         </div>
     </div>
 </body>

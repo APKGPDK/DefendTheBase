@@ -6,12 +6,14 @@ import MovingSystem from "../Systems/MovingSystem";
 import MovementComponent from "../Components/MovementComponent";
 import { Vector3, PhysicsImpostor, Mesh } from "babylonjs";
 import EnemySystem from "../Systems/EnemySystem";
+import HUDSystem from "../Systems/HUDSystem";
 
 export default class GameScene extends Scene {
     private camera: BABYLON.UniversalCamera
     public shadowGenerator: BABYLON.ShadowGenerator
 
     async onCreate() {
+        const hudSystem = this.game.getSystem(HUDSystem);
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
         //let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
 
@@ -96,6 +98,8 @@ export default class GameScene extends Scene {
             }
         }
 
+        hudSystem.hideMenu();
+        hudSystem.hideGameOver();
     }
     registeredFunction: Function
     shoot(point: Vector3) {

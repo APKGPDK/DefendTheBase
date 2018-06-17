@@ -32,6 +32,7 @@ export default class Scene {
     }
 
     destroy() {
+        this.scene.dispose();
         this.onDestroy()
     }
 

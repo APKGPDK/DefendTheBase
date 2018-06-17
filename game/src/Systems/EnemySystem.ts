@@ -3,6 +3,7 @@ import EnemyComponent from "../Components/EnemyComponent";
 import { Vector3 } from "babylonjs";
 import Entity from "../Engine/Entity";
 import GameScene from "../Scenes/GameScene";
+import BaseSystem from "./BaseSystem";
 
 export default class EnemySystem extends System {
     lastSpawnAt: number = null;
@@ -10,8 +11,10 @@ export default class EnemySystem extends System {
     enemiesCount: number = 0;
     maxEnemiesCount: number = 10;
 
-    onStart() {
+    private baseSystem: BaseSystem;
 
+    onStart() {
+        this.baseSystem = this.game.getSystem(BaseSystem);
     }
 
     onUpdate(): void {
@@ -22,14 +25,13 @@ export default class EnemySystem extends System {
             if (enemy.mesh.position.x > 4) {
                 enemy.mesh.physicsImpostor.setLinearVelocity(Vector3.Zero())
 
-                if(enemy.animations.walk){
+                if (enemy.animations.walk) {
                     enemy.animations.walk.stop();
                     enemy.animations.walk = void 0;
                     enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
                 }
-                
-                //enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
-                
+
+                this.handleAttack(enemy);
             }
 
             this.deleteIfGarbage(enemy);
@@ -44,7 +46,7 @@ export default class EnemySystem extends System {
 
         const currentScene = this.game.getCurrentScene();
 
-        const startHealth = 100
+        const startHealth = 3
         const enemyData = new EnemyComponent(startHealth)
         const enemy = currentScene.createEntity({
             name: "StickmanEnemy",
@@ -59,7 +61,7 @@ export default class EnemySystem extends System {
         enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true)
         //const animation = currentScene.scene.beginAnimation(enemy.mesh.skeleton, 140, 220, true);
 
-      //  animation.stop();
+        //  animation.stop();
 
         const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene)
         material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)
@@ -102,7 +104,8 @@ export default class EnemySystem extends System {
     markEnemyAsKilled(enemy: Entity) {
         const enemyData = enemy.getComponent(EnemyComponent)
         if (!enemyData.isKilled) {
-            enemyData.isKilled = true
+            this.baseSystem.addCash(10);
+            enemyData.isKilled = true;
             this.enemiesCount--;
         }
     }
@@ -126,5 +129,15 @@ export default class EnemySystem extends System {
         const color = new BABYLON.Color3(red, green, 0);
         */
         return new BABYLON.Color3(1, healthFactor, healthFactor)
+    }
+
+    handleAttack(enemy: Entity) {
+    
+        const enemyData = enemy.getComponent(EnemyComponent)
+        const currentElapsedTime = this.game.timeManager.getElapsedMiliseconds()
+        if (+enemyData.lastAttackAt < currentElapsedTime - enemyData.attackInterval) {
+            enemyData.lastAttackAt = currentElapsedTime;
+            this.baseSystem.hurtBase(enemyData.damage);
+        }
     }
 }
