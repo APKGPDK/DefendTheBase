@@ -57,7 +57,7 @@ export default class EnemySystem extends System {
                 this.healthBonus++;
 
                 if(this.currentWave > 5){
-                    var enemies:number[] = [Math.random()*20 % 10, Math.random()*20 % 10, Math.random()*20 % 10]
+                    var enemies:number[] = [Math.random()*20 % 10 + 1, Math.random()*20 % 10 + 1, Math.random()*20 % 10 + 1]
                     this.waveData.push(enemies);
                 }
             }
