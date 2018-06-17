@@ -4,7 +4,7 @@ import { MeshAssets } from "../MeshAssets";
 import Entity from "../Engine/Entity";
 import MovingSystem from "../Systems/MovingSystem";
 import MovementComponent from "../Components/MovementComponent";
-import { Vector3, PhysicsImpostor, Mesh } from "babylonjs";
+import { Vector3, PhysicsImpostor, Mesh, Color3 } from "babylonjs";
 import EnemySystem from "../Systems/EnemySystem";
 
 export default class GameScene extends Scene {
@@ -18,6 +18,8 @@ export default class GameScene extends Scene {
         await this.preloadAssets({
             Bush: "Bush2.babylon",
             Tree: "Tree1.babylon",
+            Rock1: "Rock1.babylon",
+            Rock2: "Rock2.babylon",
             Base: "baseCenter.babylon",
             Enemy: "Enemy.babylon",
             StickmanEnemy: "StickmanEnemy.babylon"
@@ -25,30 +27,44 @@ export default class GameScene extends Scene {
                 Particle: "Particle.png"
             })
 
-        const bush1 = this.createMesh({
-            meshName: 'Bush',
-            name: 'Bush',
-            position: new BABYLON.Vector3(3, 0, 3)
-        })
+        for(var i = 0; i < 30; i++){
+            var l = i%20;
+            const bush1 = this.createMesh({
+                meshName: 'Bush',
+                name: 'Bush',
+                position: new BABYLON.Vector3(-8+Math.ceil(Math.random() * 5  - 4 + l), 0, 8 + Math.ceil(Math.random() * 6 - 5)),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+        }
 
-        const bush2 = this.createMesh({
-            meshName: 'Bush',
-            name: 'Bush',
-            position: new BABYLON.Vector3(-2, 0, 2)
-        })
+        for(var i = 0; i < 35; i++){
+            //if(i>19)
+            var l = i%20;
 
-        const tree = this.createMesh({
-            meshName: 'Tree',
-            name: 'Tree',
-            position: new BABYLON.Vector3(0, 0, 4)
-        })
+            const tree = this.createMesh({
+                meshName: 'Tree',
+                name: 'Tree',
+                position: new BABYLON.Vector3(-8+Math.ceil(Math.random() * 5  - 4 + l), 0, 12 + Math.ceil(Math.random() * 6 - 5)),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+        }
 
         const base = this.createMesh({
             meshName: 'Base',
             name: "Base",
-            position: new BABYLON.Vector3(6, 0, 0)
+            position: new BABYLON.Vector3(6, 0, 0),
+            scaling: new Vector3(0.75, 0.75, 0.75)
         })
-        this.scene.beginAnimation(base.getChildMeshes()[0], 0, 300, true)
+        this.scene.beginAnimation(base.getChildMeshes()[0], 0, 300, true);
+    
+        for( var i = 1; i < 7; i++){ // color base foundation
+            base.getChildMeshes()[i].material = new BABYLON.StandardMaterial("BaseFoundationMaterial", this.scene);
+            (<BABYLON.StandardMaterial>base.getChildMeshes()[i].material).diffuseColor = new Color3(0.8,0.8,0.8);
+        }
+        
+        //color base orb
+        base.getChildMeshes()[0].material = new BABYLON.StandardMaterial("BaseOrbMaterial", this.scene);
+        (<BABYLON.StandardMaterial>base.getChildMeshes()[0].material).diffuseColor = new Color3(1,1,0);
 
         this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 20, -10), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
@@ -72,9 +88,9 @@ export default class GameScene extends Scene {
         this.shadowGenerator.useBlurCloseExponentialShadowMap = true;
         this.shadowGenerator.forceBackFacesOnly = true;
 
-        this.shadowGenerator.addShadowCaster(tree)
-        this.shadowGenerator.addShadowCaster(bush1)
-        this.shadowGenerator.addShadowCaster(bush2)
+       // this.shadowGenerator.addShadowCaster(tree)
+        //this.shadowGenerator.addShadowCaster(bush1)
+        //this.shadowGenerator.addShadowCaster(bush2)
         this.shadowGenerator.addShadowCaster(base)
 
         const ground = BABYLON.Mesh.CreateGround('Ground', 50, 30, 10, this.scene, false);
@@ -87,6 +103,7 @@ export default class GameScene extends Scene {
         grassMaterial.diffuseColor = new BABYLON.Color3(0, 1, 0);
         ground.material = grassMaterial;
 
+       
         //this.scene.debugLayer.show();
 
         this.scene.onPointerDown = event => {
@@ -96,14 +113,17 @@ export default class GameScene extends Scene {
             }
         }
 
+ 
+
     }
+
     registeredFunction: Function
     shoot(point: Vector3) {
-        const direction = point.subtract(new Vector3(6, 3, 0)).normalize().multiply(new Vector3(32, 32, 32))
+        const direction = point.subtract(new Vector3(6, 5, 0)).normalize().multiply(new Vector3(32, 32, 32))
         let entity = this.createEntity({
             name: "Bullet",
             meshName: "Enemy",
-            position: new Vector3(6, 3, 0),
+            position: new Vector3(6, 5, 0),
             scaling: new Vector3(0.1, 0.1, 0.1)
         });
         entity.addComponent(new MovementComponent(direction));
@@ -115,7 +135,7 @@ export default class GameScene extends Scene {
         const impostors = enemySystem.entities.map(enemy => enemy.mesh.physicsImpostor)
         const hitCallback = (collider: BABYLON.PhysicsImpostor, collidedAgaints: BABYLON.PhysicsImpostor) => {
             (collider.object as Mesh).visibility = 0
-            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, 25, collider.getObjectCenter())
+            enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, 25, collider.getObjectCenter()) // mnoznik do obrazen za ulepszenia
             this.explode(collider.getObjectCenter())
             this.disposeEntity((collider.object as any).parentEntity)
             entity.mesh.physicsImpostor.unregisterOnPhysicsCollide(impostors, hitCallback)
@@ -143,7 +163,7 @@ export default class GameScene extends Scene {
         }, 3000)
     }
 
-    onUpdate() { }
+    onUpdate(){ }
 
     onDestroy() { }
 }

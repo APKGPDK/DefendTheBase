@@ -10,13 +10,47 @@ export default class EnemySystem extends System {
     enemiesCount: number = 0;
     maxEnemiesCount: number = 10;
 
+    currentWave: number = 0;
+    healthBonus: number = 0;
+    // punching, kicking, bomb
+
+    waveData = [[10, 0, 0], 
+                [6, 4, 0],
+                [Math.ceil(Math.random() * 15 - 5), 5, 0],
+                [10, 5, 1],
+                [20, 10, 2],
+                [0, 0, 10]];
+                //[Math.ceil(Math.random() * 10 - 5)],
+               // [Math.ceil(Math.random() * 10 - 5)],
+               // [Math.ceil(Math.random() * 10 - 5)],
+              //  [Math.ceil(Math.random() * 10 - 5)]];
+
     onStart() {
 
     }
 
     onUpdate(): void {
         if (this.game.timeManager.getElapsedMiliseconds() > this.lastSpawnAt + 1500) {
-            this.spawnEnemy()
+
+            if(this.waveData[this.currentWave][0] > 0){
+                this.spawnEnemy("punchingEnemy", "StickmanEnemy")
+                this.waveData[this.currentWave][0]--
+            }
+
+            if(this.waveData[this.currentWave][1] > 0){
+                this.spawnEnemy("kickingEnemy", "StickmanEnemy")
+                this.waveData[this.currentWave][1]--
+            }
+
+            // if(this.waveData[this.currentWave][2] > 0){
+            //     this.spawnEnemy("BombEnemy")
+            //     this.waveData[this.currentWave][2]--
+            // }
+
+            if(this.waveData[this.currentWave][0] == 0 && this.waveData[this.currentWave][1] == 0 && this.waveData[this.currentWave][2] == 0 && this.enemiesCount == 0){
+                this.currentWave++
+                this.healthBonus+=25;
+            }
         }
         this.entities.forEach(enemy => {
             if (enemy.mesh.position.x > 4) {
@@ -25,10 +59,17 @@ export default class EnemySystem extends System {
                 if(enemy.animations.walk){
                     enemy.animations.walk.stop();
                     enemy.animations.walk = void 0;
+
+                    const enemyData = enemy.getComponent(EnemyComponent)
+
+                    if(enemyData.type == "kickingEnemy")
+                    enemy.mesh.skeleton.beginAnimation('KickingAttackAnimation', true)
+
+                    if(enemyData.type == "punchingEnemy")
                     enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
                 }
                 
-                //enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
+               //zadawanie obrazen bazie
                 
             }
 
@@ -36,7 +77,7 @@ export default class EnemySystem extends System {
         })
     }
 
-    spawnEnemy() {
+    spawnEnemy(enemyType: string, meshN: string) {
         if (this.maxEnemiesCount <= this.enemiesCount) return;
         this.enemiesCount++;
 
@@ -44,11 +85,11 @@ export default class EnemySystem extends System {
 
         const currentScene = this.game.getCurrentScene();
 
-        const startHealth = 100
-        const enemyData = new EnemyComponent(startHealth)
+        const startHealth = 50 + this.healthBonus;
+        const enemyData = new EnemyComponent(startHealth, enemyType) // typy zaleznie od fali
         const enemy = currentScene.createEntity({
-            name: "StickmanEnemy",
-            meshName: "StickmanEnemy",
+            name: "Enemy",
+            meshName: meshN,
             position: new Vector3(-16, 1.4, Math.ceil(Math.random() * 10 - 5)),
             scaling: new Vector3(0.25, 0.25, 0.25),
             rotation: new Vector3(0, 30, 0)
