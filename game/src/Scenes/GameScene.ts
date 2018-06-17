@@ -23,7 +23,7 @@ export default class GameScene extends Scene {
         const hudSystem = this.game.getSystem(HUDSystem);
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
 
-        let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
+        //let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
 
         await this.preloadAssets({
             Bush: "Bush2.babylon",
@@ -33,15 +33,16 @@ export default class GameScene extends Scene {
             Base: "baseCenter.babylon",
             Enemy: "Enemy.babylon",
             StickmanEnemy: "StickmanEnemy.babylon",
+            BombEnemy: "BombEnemy.babylon",
             Wall: "Wall.babylon",
             Building: "Building.babylon"
         }, {
-                Particle: "Particle.png"
+                Particle: "SquareParticle.png"
             })
 
-        this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 20, -10), this.scene);
-        this.camera.setTarget(BABYLON.Vector3.Zero());
-        this.camera.attachControl(this.game.getCanvas(), false)
+        this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 13, -8), this.scene);
+        this.camera.setTarget(new BABYLON.Vector3(0, 2.5, 0));
+      //  this.camera.attachControl(this.game.getCanvas(), false)
         this.setupLights()
 
         this.shadowGenerator = new BABYLON.ShadowGenerator(1024, this.directionalLight);
@@ -97,12 +98,12 @@ export default class GameScene extends Scene {
     explode(position: Vector3) {
 
         const systemName = "particles" + (new Date).getTime();
-        const particleSystem = new BABYLON.ParticleSystem(name, 10, this.scene);
+        const particleSystem = new BABYLON.ParticleSystem(name, 50, this.scene);
         particleSystem.minEmitPower = 10;
-        particleSystem.maxEmitPower = 10;
+        particleSystem.maxEmitPower = 50;
         particleSystem.particleTexture = this.game.getTextureData("Particle")
-        particleSystem.emitter = position.add(new Vector3(0.5, 0, 0))
-        particleSystem.gravity = new Vector3(0, 10, 0)
+        particleSystem.emitter = position.add(new Vector3(0.5, 1, 0))
+        particleSystem.gravity = new Vector3(0, 5, 0)
         particleSystem.start()
         setTimeout(() => {
             particleSystem.stop()

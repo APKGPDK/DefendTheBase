@@ -1,6 +1,6 @@
 import System from "../Engine/System";
 import EnemyComponent from "../Components/EnemyComponent";
-import { Vector3 } from "babylonjs";
+import { Vector3, Color3 } from "babylonjs";
 import Entity from "../Engine/Entity";
 import GameScene from "../Scenes/GameScene";
 import BaseSystem from "./BaseSystem";
@@ -16,12 +16,12 @@ export default class EnemySystem extends System {
     // punching, kicking, bomb
 
     waveData = [
-        [10, 0, 0],
-        [6, 4, 0],
-        [Math.ceil(Math.random() * 15 - 5), 5, 0],
-        [10, 5, 1],
-        [20, 10, 2],
-        [0, 0, 10]
+        [5, 5, 5],
+        [6, 4, 1],
+        [10, 6, 2],
+        [15, 20, 3],
+        [20, 10, 5],
+        [30, 30, 10]
     ];
     // [Math.ceil(Math.random() * 10 - 5)],
     // [Math.ceil(Math.random() * 10 - 5)],
@@ -48,7 +48,7 @@ export default class EnemySystem extends System {
             }
 
             if (this.waveData[this.currentWave][2] > 0) {
-                this.spawnEnemy("BombEnemy", "BombEnemy")
+                this.spawnEnemy("bombEnemy", "BombEnemy")
                 this.waveData[this.currentWave][2]--
             }
 
@@ -61,17 +61,45 @@ export default class EnemySystem extends System {
             if (enemy.mesh.position.x > 4 - Math.cos(enemy.mesh.position.z / 2)) {
                 enemy.mesh.physicsImpostor.setLinearVelocity(Vector3.Zero())
 
+                const enemyData = enemy.getComponent(EnemyComponent)
+
                 if (enemy.animations.walk) {
                     enemy.animations.walk.stop();
                     enemy.animations.walk = void 0;
 
-                    const enemyData = enemy.getComponent(EnemyComponent)
+                   
 
                     if (enemyData.type == "kickingEnemy")
                         enemy.mesh.skeleton.beginAnimation('KickingAttackAnimation', true)
 
                     if (enemyData.type == "punchingEnemy")
                         enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
+                  
+                }
+
+                
+                if (enemyData.type == "bombEnemy"){
+                    
+                    this.game.getCurrentScene().disposeEntity(enemy);
+
+                    this.baseSystem.hurtBase(enemyData.damage);
+
+                    this.enemiesCount--;
+
+                    const systemName = "particles" + (new Date).getTime();
+                    const particleSystem = new BABYLON.ParticleSystem(name, 100, this.game.getCurrentScene().scene);
+                    particleSystem.minEmitPower = 10;
+                    particleSystem.maxEmitPower = 50;
+                    particleSystem.particleTexture = this.game.getTextureData("Particle")
+                    particleSystem.emitter = enemy.mesh.position.add(new Vector3(0.5, 1, 0))
+                    particleSystem.gravity = new Vector3(0, 10, 0)
+                    particleSystem.start()
+                    setTimeout(() => {
+                        particleSystem.stop()
+                    }, 500)
+                    setTimeout(() => {
+                        particleSystem.dispose(false)
+                    }, 3000)
                 }
 
                 this.handleAttack(enemy);
@@ -87,7 +115,22 @@ export default class EnemySystem extends System {
         const currentScene = this.game.getCurrentScene();
 
         const startHealth = 3 + this.healthBonus;
-        const enemyData = new EnemyComponent(startHealth, enemyType, this.currentWave + 1) // typy zaleznie od fali
+
+        
+    
+        if(enemyType == "kickingEnemy"){
+            var enemyDamage = 2*this.currentWave+1;
+        }
+        
+        if(enemyType == "punchingEnemy"){
+            var enemyDamage = 3*this.currentWave+1;
+        }
+
+        if(enemyType == "bombEnemy"){
+            var enemyDamage = 10*this.currentWave+1;
+        }
+
+        const enemyData = new EnemyComponent(startHealth, enemyType, enemyDamage) // typy zaleznie od fali
 
         var scale = new Vector3(0.65, 0.65, 0.65);
         var pos = new Vector3(-16, 0.6, Math.ceil(Math.random() * 10 - 5));
@@ -106,16 +149,24 @@ export default class EnemySystem extends System {
         });
 
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
+
         if (meshName != "BombEnemy") {
             enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true);
         } else {
+           
+
             currentScene.scene.beginDirectAnimation(enemy.mesh, [enemy.mesh.animations[0]], 0, 250, true);
         }
 
         const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene);
-        material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)
+        material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor, enemyType)
         enemy.mesh.material = material;
         enemy.mesh.receiveShadows = true;
+
+        if(enemyType == "bombEnemy"){
+            material.diffuseColor = new Color3(0, 0, 0);
+        } 
+      
 
         (this.game.getCurrentScene() as GameScene).shadowGenerator.addShadowCaster(enemy.mesh)
 
@@ -139,7 +190,7 @@ export default class EnemySystem extends System {
         const enemyData = enemy.getComponent(EnemyComponent)
         if (!enemyData.isKilled) {
             enemyData.health -= damage;
-            (<BABYLON.StandardMaterial>enemy.mesh.material).diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)
+            (<BABYLON.StandardMaterial>enemy.mesh.material).diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor, enemyData.type);
             enemy.mesh.material.markDirty()
 
             if (enemyData.health <= 0) {
@@ -172,11 +223,14 @@ export default class EnemySystem extends System {
 
     }
 
-    getColorByHealthFactor(healthFactor: number) {
+    getColorByHealthFactor(healthFactor: number, type: string) {
         /*const red = healthFactor <= 0.5 ? 1 : 2 - healthFactor * 2
         const green = healthFactor >= 0.5 ? 1 : healthFactor * 2
         const color = new BABYLON.Color3(red, green, 0);
         */
+        if(type=="bombEnemy"){
+            return new BABYLON.Color3(1 - healthFactor, 0, 0)
+        }else 
         return new BABYLON.Color3(1, healthFactor, healthFactor)
     }
 
