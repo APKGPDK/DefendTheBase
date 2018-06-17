@@ -15,6 +15,7 @@ export default class GameScene extends Scene {
 
     directionalLight: DirectionalLight
 
+    music: BABYLON.Sound;
     base: Mesh
     public buildings: Mesh[] = []
     public walls: Mesh[] = []
@@ -23,7 +24,7 @@ export default class GameScene extends Scene {
         const hudSystem = this.game.getSystem(HUDSystem);
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
 
-        //let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
+        this.music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
 
         await this.preloadAssets({
             Bush: "Bush2.babylon",
@@ -68,6 +69,7 @@ export default class GameScene extends Scene {
 
     registeredFunction: Function
     shoot(point: Vector3) {
+        new BABYLON.Sound("Ambient", "/assets/Puck.ogg", this.scene, null, { autoplay: true });
         const baseSystem = this.game.getSystem(BaseSystem);
         const direction = point.subtract(new Vector3(6, 5, 0)).normalize().multiply(new Vector3(32, 32, 32))
         let entity = this.createEntity({
@@ -84,6 +86,7 @@ export default class GameScene extends Scene {
         const enemySystem = this.game.getSystem(EnemySystem)
         const impostors = enemySystem.entities.map(enemy => enemy.mesh.physicsImpostor)
         const hitCallback = (collider: BABYLON.PhysicsImpostor, collidedAgaints: BABYLON.PhysicsImpostor) => {
+            new BABYLON.Sound("Ambient", "/assets/Ouch.ogg", this.scene, null, { autoplay: true });
             (collider.object as Mesh).visibility = 0
             enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, baseSystem.getDamage(), collider.getObjectCenter()) // mnoznik do obrazen za ulepszenia
             this.explode(collider.getObjectCenter())
@@ -96,7 +99,6 @@ export default class GameScene extends Scene {
     }
 
     explode(position: Vector3) {
-
         const systemName = "particles" + (new Date).getTime();
         const particleSystem = new BABYLON.ParticleSystem(name, 50, this.scene);
         particleSystem.minEmitPower = 10;
@@ -115,7 +117,9 @@ export default class GameScene extends Scene {
 
     onUpdate() { }
 
-    onDestroy() { }
+    onDestroy() {
+        this.music.stop();
+    }
 
     generateAmbient() {
         for (var i = 0; i < 30; i++) {

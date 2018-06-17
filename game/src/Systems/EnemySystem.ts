@@ -204,6 +204,7 @@ export default class EnemySystem extends System {
     markEnemyAsKilled(enemy: Entity) {
         const enemyData = enemy.getComponent(EnemyComponent)
         if (!enemyData.isKilled) {
+            new BABYLON.Sound("Ambient", "/assets/Death.ogg", this.game.getCurrentScene().scene, null, { autoplay: true });
             this.baseSystem.addCash(10 + this.currentWave * 5);
             enemyData.isKilled = true;
             this.enemiesCount--;
@@ -235,11 +236,11 @@ export default class EnemySystem extends System {
     }
 
     handleAttack(enemy: Entity) {
-
         const enemyData = enemy.getComponent(EnemyComponent)
         const currentElapsedTime = this.game.timeManager.getElapsedMiliseconds()
         if (+enemyData.lastAttackAt < currentElapsedTime - enemyData.attackInterval) {
             enemyData.lastAttackAt = currentElapsedTime;
+            new BABYLON.Sound("Ambient", enemyData.type == "bombEnemy" ? "/assets/Boom.ogg" : "/assets/Hit.ogg", this.game.getCurrentScene().scene, null, { autoplay: true });
             this.baseSystem.hurtBase(enemyData.damage);
         }
     }

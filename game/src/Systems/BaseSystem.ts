@@ -46,6 +46,7 @@ export default class BaseSystem extends System {
         const nextLevelPrice = this.getNextWallsPrice();
         if (nextLevelPrice <= this.cash) {
             const currentScene = this.game.getCurrentScene() as GameScene;
+            new BABYLON.Sound("Ambient", "/assets/Upgraded.ogg", currentScene.scene, null, { autoplay: true });
             if (this.wallsLevel < currentScene.walls.length) {
                 currentScene.walls[this.wallsLevel].setEnabled(true);
             }
@@ -64,6 +65,7 @@ export default class BaseSystem extends System {
         const nextLevelPrice = this.getNextWarehousesPrice();
         if (nextLevelPrice <= this.cash) {
             const currentScene = this.game.getCurrentScene() as GameScene;
+            new BABYLON.Sound("Ambient", "/assets/Upgraded.ogg", currentScene.scene, null, { autoplay: true });
             if (this.energyLevel < currentScene.buildings.length) {
                 currentScene.buildings[this.energyLevel].setEnabled(true);
             }
