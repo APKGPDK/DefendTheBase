@@ -24,7 +24,7 @@ export default class GameScene extends Scene {
         const hudSystem = this.game.getSystem(HUDSystem);
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
 
-        this.music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
+        this.music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true, volume: 0.5 });
 
         await this.preloadAssets({
             Bush: "Bush2.babylon",
@@ -86,7 +86,7 @@ export default class GameScene extends Scene {
         const enemySystem = this.game.getSystem(EnemySystem)
         const impostors = enemySystem.entities.map(enemy => enemy.mesh.physicsImpostor)
         const hitCallback = (collider: BABYLON.PhysicsImpostor, collidedAgaints: BABYLON.PhysicsImpostor) => {
-            new BABYLON.Sound("Ambient", "/assets/Ouch.ogg", this.scene, null, { autoplay: true });
+            new BABYLON.Sound("Ambient", "/assets/Ouch.ogg", this.scene, null, { autoplay: true, volume: 0.2 });
             (collider.object as Mesh).visibility = 0
             enemySystem.hitEnemy((collidedAgaints.object as any).parentEntity, baseSystem.getDamage(), collider.getObjectCenter()) // mnoznik do obrazen za ulepszenia
             this.explode(collider.getObjectCenter())

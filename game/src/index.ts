@@ -14,9 +14,13 @@ const global = (window as any);
 game.registerSystem(MovingSystem);
 game.registerSystem(EnemySystem);
 game.registerSystem(HUDSystem);
-const baseSystem = game.registerSystem(BaseSystem) as BaseSystem;
+game.registerSystem(BaseSystem) as BaseSystem;
 
 global.startGame = () => game.start(GameScene);
-global.buildWalls = () => baseSystem.upgradeWalls();
-global.buildWarehouses = () => baseSystem.upgradeWarehouses();
+global.buildWalls = () => {
+    game.getSystem(BaseSystem).upgradeWalls();
+}
+global.buildWarehouses = () => {
+    game.getSystem(BaseSystem).upgradeWarehouses();
+}
 global.game = game;
