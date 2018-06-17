@@ -7,24 +7,17 @@ Exporter version: 5.5.0, Blender version: 2.79 (sub 0)
 		texture directory:  C:\Users\USER\Desktop\PROGRAMOWANIE\DefendTheBase\assets\
 	Python World class constructor completed
 	WARNING: No active camera has been assigned, or is not in a currently selected Blender layer
-	processing begun of mesh:  Cube
-		processing begun of Standard material:  Material.002
-		num positions      :  276
-		num normals        :  276
+	processing begun of mesh:  Bomb
+		animation processing begun
+			processing action BombRollout:  in[0 - 250], out[0 - 250]
+		WARNING: No materials have been assigned: 
+		num positions      :  456
+		num normals        :  456
 		num uvs            :  0
 		num uvs2           :  0
 		num colors         :  0
-		num indices        :  276
-		WARNING: # of 0 area faces found:  14
-	processing begun of mesh:  Cylinder
-		processing begun of Standard material:  Material.001
-		num positions      :  381
-		num normals        :  381
-		num uvs            :  0
-		num uvs2           :  0
-		num colors         :  0
-		num indices        :  381
+		num indices        :  456
 ========= Writing of scene file started =========
 ========= Writing of scene file completed =========
 ========= end of processing =========
-elapsed time:  0 min, 0.029 secs
+elapsed time:  0 min, 0.024 secs

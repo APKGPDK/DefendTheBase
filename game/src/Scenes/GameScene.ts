@@ -11,6 +11,8 @@ export default class GameScene extends Scene {
     private camera: BABYLON.UniversalCamera
     public shadowGenerator: BABYLON.ShadowGenerator
 
+    public buildings: Mesh [] = []
+
     async onCreate() {
         this.scene.enablePhysics(BABYLON.Vector3.Zero());
         //let music = new BABYLON.Sound("Ambient", "/assets/Ambient.ogg", this.scene, null, { loop: true, autoplay: true });
@@ -23,10 +25,25 @@ export default class GameScene extends Scene {
             Base: "baseCenter.babylon",
             Enemy: "Enemy.babylon",
             BombEnemy: "BombEnemy.babylon",
-            StickmanEnemy: "StickmanEnemy.babylon"
+            StickmanEnemy: "StickmanEnemy.babylon",
+            Building: "Building.babylon"
         }, {
                 Particle: "Particle.png"
             })
+
+            for(var i = 0; i < 5; i++){
+
+
+                const building = this.createMesh({
+                    meshName: 'Building',
+                    name: 'Building',
+                    position: new BABYLON.Vector3(9+i%3*2, 0, i*2),
+                    rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+                })
+                building.setEnabled(false);
+                this.buildings.push(building);
+            
+            }
 
         for(var i = 0; i < 30; i++){
             var l = i%20;
@@ -50,6 +67,24 @@ export default class GameScene extends Scene {
             })
         }
 
+        for(var i = 0; i < 10; i++){
+            const tree = this.createMesh({
+                meshName: 'Rock1',
+                name: 'Rock1',
+                position: new BABYLON.Vector3(-8 + Math.ceil(Math.random() * 5  - 4 + i), 0, 12 + Math.ceil(Math.random() * 6 - 5)),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+        }
+
+        for(var i = 0; i < 10; i++){
+            const tree = this.createMesh({
+                meshName: 'Rock2',
+                name: 'Rock2',
+                position: new BABYLON.Vector3(Math.ceil(Math.random() * 5  - 4 + i), 0, 12 + Math.ceil(Math.random() * 6 - 5)),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+        }
+
         const base = this.createMesh({
             meshName: 'Base',
             name: "Base",
@@ -66,6 +101,8 @@ export default class GameScene extends Scene {
         //color base orb
         base.getChildMeshes()[0].material = new BABYLON.StandardMaterial("BaseOrbMaterial", this.scene);
         (<BABYLON.StandardMaterial>base.getChildMeshes()[0].material).diffuseColor = new Color3(1,1,0);
+
+        
 
         this.camera = new BABYLON.UniversalCamera('camera1', new BABYLON.Vector3(0, 20, -10), this.scene);
         this.camera.setTarget(BABYLON.Vector3.Zero());
