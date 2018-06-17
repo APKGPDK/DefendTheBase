@@ -4,31 +4,74 @@ import { Vector3 } from "babylonjs";
 import Entity from "../Engine/Entity";
 import GameScene from "../Scenes/GameScene";
 import BaseSystem from "./BaseSystem";
+import HUDSystem from "./HUDSystem";
 
 export default class EnemySystem extends System {
     lastSpawnAt: number = null;
-
     enemiesCount: number = 0;
-    maxEnemiesCount: number = 10;
-
     private baseSystem: BaseSystem;
+    private hudSystem: HUDSystem;
+    currentWave: number = 0;
+    healthBonus: number = 0;
+    // punching, kicking, bomb
+
+    waveData = [
+        [10, 0, 0],
+        [6, 4, 0],
+        [Math.ceil(Math.random() * 15 - 5), 5, 0],
+        [10, 5, 1],
+        [20, 10, 2],
+        [0, 0, 10]
+    ];
+    // [Math.ceil(Math.random() * 10 - 5)],
+    // [Math.ceil(Math.random() * 10 - 5)],
+    // [Math.ceil(Math.random() * 10 - 5)],
+    // [Math.ceil(Math.random() * 10 - 5)]];
 
     onStart() {
         this.baseSystem = this.game.getSystem(BaseSystem);
+        this.hudSystem = this.game.getSystem(HUDSystem);
     }
 
     onUpdate(): void {
+        this.hudSystem.setProperty('wave', this.currentWave + 1);
         if (this.game.timeManager.getElapsedMiliseconds() > this.lastSpawnAt + 1500) {
-            this.spawnEnemy()
+
+            if (this.waveData[this.currentWave][0] > 0) {
+                this.spawnEnemy("punchingEnemy", "StickmanEnemy")
+                this.waveData[this.currentWave][0]--
+            }
+
+            if (this.waveData[this.currentWave][1] > 0) {
+                this.spawnEnemy("kickingEnemy", "StickmanEnemy")
+                this.waveData[this.currentWave][1]--
+            }
+
+            // if(this.waveData[this.currentWave][2] > 0){
+            //     this.spawnEnemy("BombEnemy")
+            //     this.waveData[this.currentWave][2]--
+            // }
+
+            if (this.waveData[this.currentWave][0] == 0 && this.waveData[this.currentWave][1] == 0 && this.waveData[this.currentWave][2] == 0 && this.enemiesCount == 0) {
+                this.currentWave++
+                this.healthBonus += 25;
+            }
         }
         this.entities.forEach(enemy => {
-            if (enemy.mesh.position.x > 4) {
+            if (enemy.mesh.position.x > 4 - Math.cos(enemy.mesh.position.z / 2)) {
                 enemy.mesh.physicsImpostor.setLinearVelocity(Vector3.Zero())
 
                 if (enemy.animations.walk) {
                     enemy.animations.walk.stop();
                     enemy.animations.walk = void 0;
-                    enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
+
+                    const enemyData = enemy.getComponent(EnemyComponent)
+
+                    if (enemyData.type == "kickingEnemy")
+                        enemy.mesh.skeleton.beginAnimation('KickingAttackAnimation', true)
+
+                    if (enemyData.type == "punchingEnemy")
+                        enemy.mesh.skeleton.beginAnimation('PunchingAttackAnimation', true)
                 }
 
                 this.handleAttack(enemy);
@@ -38,30 +81,22 @@ export default class EnemySystem extends System {
         })
     }
 
-    spawnEnemy() {
-        if (this.maxEnemiesCount <= this.enemiesCount) return;
+    spawnEnemy(enemyType: string, meshN: string) {
         this.enemiesCount++;
-
         this.lastSpawnAt = this.game.timeManager.getElapsedMiliseconds()
-
         const currentScene = this.game.getCurrentScene();
-
-        const startHealth = 3
-        const enemyData = new EnemyComponent(startHealth)
+        const startHealth = 3 + this.healthBonus;
+        const enemyData = new EnemyComponent(startHealth, enemyType, this.currentWave + 1) // typy zaleznie od fali
         const enemy = currentScene.createEntity({
-            name: "StickmanEnemy",
-            meshName: "StickmanEnemy",
-            position: new Vector3(-16, 1.4, Math.ceil(Math.random() * 10 - 5)),
+            name: "Enemy",
+            meshName: meshN,
+            position: new Vector3(-16, 1.4, Math.random() * 10 - 5),
             scaling: new Vector3(0.25, 0.25, 0.25),
             rotation: new Vector3(0, 30, 0)
         });
 
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
-        //console.log(enemy.mesh.animations);
         enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true)
-        //const animation = currentScene.scene.beginAnimation(enemy.mesh.skeleton, 140, 220, true);
-
-        //  animation.stop();
 
         const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene)
         material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)
@@ -104,7 +139,7 @@ export default class EnemySystem extends System {
     markEnemyAsKilled(enemy: Entity) {
         const enemyData = enemy.getComponent(EnemyComponent)
         if (!enemyData.isKilled) {
-            this.baseSystem.addCash(10);
+            this.baseSystem.addCash(10 + this.currentWave * 5);
             enemyData.isKilled = true;
             this.enemiesCount--;
         }
@@ -132,7 +167,7 @@ export default class EnemySystem extends System {
     }
 
     handleAttack(enemy: Entity) {
-    
+
         const enemyData = enemy.getComponent(EnemyComponent)
         const currentElapsedTime = this.game.timeManager.getElapsedMiliseconds()
         if (+enemyData.lastAttackAt < currentElapsedTime - enemyData.attackInterval) {

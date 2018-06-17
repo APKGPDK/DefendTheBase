@@ -4,7 +4,7 @@ import HUDSystem from "./HUDSystem";
 export default class BaseSystem extends System {
 
     private cash = 0;
-    private health = 100;
+    private health = 10000;
 
     private hudSystem: HUDSystem
 
