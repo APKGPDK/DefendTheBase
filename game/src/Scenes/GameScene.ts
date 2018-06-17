@@ -15,6 +15,8 @@ export default class GameScene extends Scene {
     directionalLight: DirectionalLight
 
     base: Mesh
+    public buildings: Mesh[] = []
+    public walls: Mesh[] = []
 
     async onCreate() {
         const hudSystem = this.game.getSystem(HUDSystem);
@@ -30,7 +32,8 @@ export default class GameScene extends Scene {
             Base: "baseCenter.babylon",
             Enemy: "Enemy.babylon",
             StickmanEnemy: "StickmanEnemy.babylon",
-            Wall: "Wall.babylon"
+            Wall: "Wall.babylon",
+            Building: "Building.babylon"
         }, {
                 Particle: "Particle.png"
             })
@@ -48,6 +51,7 @@ export default class GameScene extends Scene {
         this.generateAmbient();
         this.addBase();
         this.buildWalls();
+        this.buildWarehouses();
 
         this.scene.onPointerDown = event => {
             const pickResult = this.scene.pick(this.scene.unTranslatedPointer.x, this.scene.unTranslatedPointer.y);
@@ -119,12 +123,11 @@ export default class GameScene extends Scene {
                 position: new BABYLON.Vector3(-8 + Math.ceil(Math.random() * 5 - 4 + l), 0, 8 + Math.ceil(Math.random() * 6 - 5)),
                 rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
             })
-            
+
             this.shadowGenerator.addShadowCaster(bush)
         }
 
         for (var i = 0; i < 35; i++) {
-            //if(i>19)
             var l = i % 20;
 
             const tree = this.createMesh({
@@ -134,6 +137,26 @@ export default class GameScene extends Scene {
                 rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
             })
             this.shadowGenerator.addShadowCaster(tree)
+        }
+
+        for (var i = 0; i < 10; i++) {
+            const rock = this.createMesh({
+                meshName: 'Rock1',
+                name: 'Rock1',
+                position: new BABYLON.Vector3(-8 + Math.ceil(Math.random() * 5 - 4 + i), 0, 12 + Math.ceil(Math.random() * 6 - 5)),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+            this.shadowGenerator.addShadowCaster(rock)
+        }
+
+        for (var i = 0; i < 10; i++) {
+            const rock = this.createMesh({
+                meshName: 'Rock2',
+                name: 'Rock2',
+                position: new BABYLON.Vector3(Math.ceil(Math.random() * 5 - 4 + i), 0, 12 + Math.ceil(Math.random() * 6 - 5)),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+            this.shadowGenerator.addShadowCaster(rock)
         }
     }
 
@@ -189,10 +212,24 @@ export default class GameScene extends Scene {
             const wall = this.createMesh({
                 meshName: 'Wall',
                 name: 'Wall',
-                position: new Vector3(5 - Math.cos(i), -Math.random(), i*2)
+                position: new Vector3(5 - Math.cos(i), -Math.random(), i * 2)
             })
             wall.setEnabled(false);
             this.shadowGenerator.addShadowCaster(wall)
+        }
+    }
+
+    buildWarehouses() {
+        for (var i = 0; i < 5; i++) {
+            const building = this.createMesh({
+                meshName: 'Building',
+                name: 'Building',
+                position: new BABYLON.Vector3(9 + i % 3 * 2, 0, i * 2),
+                rotation: new Vector3(0, Math.ceil(Math.random() * 10 - 5), 0)
+            })
+            building.setEnabled(false);
+            this.buildings.push(building);
+            this.shadowGenerator.addShadowCaster(building)
         }
     }
 }

@@ -47,10 +47,10 @@ export default class EnemySystem extends System {
                 this.waveData[this.currentWave][1]--
             }
 
-            // if(this.waveData[this.currentWave][2] > 0){
-            //     this.spawnEnemy("BombEnemy")
-            //     this.waveData[this.currentWave][2]--
-            // }
+            if(this.waveData[this.currentWave][2] > 0){
+                this.spawnEnemy("BombEnemy", "BombEnemy")
+                this.waveData[this.currentWave][2]--
+            }
 
             if (this.waveData[this.currentWave][0] == 0 && this.waveData[this.currentWave][1] == 0 && this.waveData[this.currentWave][2] == 0 && this.enemiesCount == 0) {
                 this.currentWave++
@@ -81,24 +81,38 @@ export default class EnemySystem extends System {
         })
     }
 
-    spawnEnemy(enemyType: string, meshN: string) {
+    spawnEnemy(enemyType: string, meshName: string) {
         this.enemiesCount++;
         this.lastSpawnAt = this.game.timeManager.getElapsedMiliseconds()
         const currentScene = this.game.getCurrentScene();
+
         const startHealth = 3 + this.healthBonus;
         const enemyData = new EnemyComponent(startHealth, enemyType, this.currentWave + 1) // typy zaleznie od fali
+
+        var scale = new Vector3(0.65, 0.65, 0.65);
+        var pos = new Vector3(-16, 0.6, Math.ceil(Math.random() * 10 - 5));
+
+        if(meshName == "StickmanEnemy"){
+            scale = new Vector3(0.25, 0.25, 0.25);  
+            pos = new Vector3(-16, 1.4, Math.ceil(Math.random() * 10 - 5));
+        }
+          
         const enemy = currentScene.createEntity({
             name: "Enemy",
-            meshName: meshN,
-            position: new Vector3(-16, 1.4, Math.random() * 10 - 5),
-            scaling: new Vector3(0.25, 0.25, 0.25),
+            meshName,
+            position: pos,
+            scaling: scale,
             rotation: new Vector3(0, 30, 0)
         });
 
         enemy.mesh = enemy.mesh.convertToFlatShadedMesh()
-        enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true)
+        if(meshName != "BombEnemy"){
+            enemy.animations.walk = enemy.mesh.skeleton.beginAnimation('WalkingAnimation', true);
+        } else{
+           currentScene.scene.beginDirectAnimation(enemy.mesh,  [enemy.mesh.animations[0]],  0, 250, true);
+        }
 
-        const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene)
+        const material = new BABYLON.StandardMaterial('enemyMaterial', this.game.getCurrentScene().scene);
         material.diffuseColor = this.getColorByHealthFactor(enemyData.healthFactor)
         enemy.mesh.material = material;
         enemy.mesh.receiveShadows = true;
