@@ -209,7 +209,7 @@ export default class EnemySystem extends System {
     markEnemyAsKilled(enemy: Entity) {
         const enemyData = enemy.getComponent(EnemyComponent)
         if (!enemyData.isKilled) {
-            new BABYLON.Sound("Ambient", "/assets/Death.ogg", this.game.getCurrentScene().scene, null, { autoplay: true, volume: 0.2 });
+            new BABYLON.Sound("Ambient", "/assets/Death.ogg", this.game.getCurrentScene().scene, null, { autoplay: true, volume: 1 });
             this.baseSystem.addCash(10 + this.currentWave * 5);
             enemyData.isKilled = true;
             this.enemiesCount--;
